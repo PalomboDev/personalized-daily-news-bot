@@ -1,0 +1,5 @@
+{
+  "url": "http://newsapi.org/v2/",
+  "keyword": "software",
+  "sort_by": "publishedAt"
+}

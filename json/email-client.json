@@ -1,0 +1,9 @@
+{
+  "smpt_server": "",
+  "smpt_port": 0,
+  "username": "",
+  "password": "",
+  "recipients": [
+    ""
+  ]
+}
