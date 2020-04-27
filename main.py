@@ -1,16 +1,14 @@
-import newsgetter, pymongo, pytz, multitimer
-from utils import JsonFile
+import newsgetter, pymongo, pytz, multitimer, utils
 from datetime import datetime
 from emailclient import EmailClient
 from newsmongodbclient import NewsMongoDBClient
-import time
 
 # Api Key
-api_key_file = JsonFile("json/api-key.json")
+api_key_file = utils.JsonFile("json/api-key.json")
 api_key = api_key_file.get_key("api-key")
 
 # News Getter / Articles
-news_getter_file = JsonFile("json/news-getter.json")
+news_getter_file = utils.JsonFile("json/news-getter.json")
 # articles = []
 news_getter = newsgetter.NewsGetter(api_key, news_getter_file.get_key("url"),
                                     news_getter_file.get_key("keyword"),
@@ -20,21 +18,21 @@ news_getter = newsgetter.NewsGetter(api_key, news_getter_file.get_key("url"),
 # newsgetter.Article.set_articles(news_getter, articles)
 
 # Email Client
-email_client_file = JsonFile("json/email-client.json")
+email_client_file = utils.JsonFile("json/email-client.json")
 email_client = EmailClient(email_client_file.get_key("smpt_server"), email_client_file.get_key("smpt_port"),
                            email_client_file.get_key("username"), email_client_file.get_key("password"),
                            email_client_file.get_key("recipients"))
 default_subject = email_client_file.get_key("default_subject")
 
 # MongoDB
-mongodb_file = JsonFile("json/mongodb.json")
+mongodb_file = utils.JsonFile("json/mongodb.json")
 mongodb_client = pymongo.MongoClient(mongodb_file.get_key("uri"))
 mongodb_database = mongodb_client[mongodb_file.get_key("database")]
 mongodb_collection = mongodb_database[mongodb_file.get_key("collection")]
 news_mongodb_client = NewsMongoDBClient(mongodb_client, mongodb_database, mongodb_collection)
 
 # Options
-options_file = JsonFile("json/options.json")
+options_file = utils.JsonFile("json/options.json")
 time_to_send = options_file.get_key("time_to_send")
 time_zone = pytz.timezone(options_file.get_key("time_zone"))
 default_article_limit = options_file.get_key("article_limit")
@@ -105,26 +103,21 @@ def store_new_news(limit=default_article_limit):
 
 
 def check_time_to_send():
-    if is_time_to_send():
+    time_now = datetime.now().astimezone(time_zone)
+
+    if utils.is_time_to_send(time_now, time_to_send):
         email_recipients_news(default_article_limit)
 
-    if is_on_the_hour():
+    if utils.is_on_the_hour(time_now):
         store_new_news()
+
+    if utils.is_on_the_second(time_now):
+        print(f"Python bot still running... Time: {utils.get_formatted_time(time_now)}")
 
 
 def start_scheduler():
     timer = multitimer.MultiTimer(1, check_time_to_send)
     timer.start()
-
-
-def is_time_to_send():
-    return datetime.now().astimezone(time_zone).strftime("%H:%M:%S") == time_to_send
-
-
-def is_on_the_hour():
-    minute = datetime.now().astimezone(time_zone).minute
-    second = datetime.now().astimezone(time_zone).second
-    return minute == 00 and second == 00
 
 
 start_scheduler()
