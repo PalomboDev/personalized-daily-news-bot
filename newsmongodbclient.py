@@ -16,6 +16,3 @@ class NewsMongoDBClient:
             a_copy = a.copy()
             a_copy["used"] = boolean
             self.mongodb_collection.replace_one(a, a_copy)
-
-    # def get_unused_articles(self):
-    #     pass
