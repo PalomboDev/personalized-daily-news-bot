@@ -1,4 +1,6 @@
 import smtplib
+from email.message import EmailMessage
+
 
 class EmailClient:
 
@@ -9,14 +11,20 @@ class EmailClient:
         self.password = password
         self.recipients = recipients
 
-    def send_email(self, subject, body):
-        with smtplib.SMTP(self.smtp_server, self.smtp_port) as smtp:
-            smtp.ehlo()
-            smtp.starttls()
-            smtp.ehlo()
-
+    def send_email(self, subject, body, body_alternative=None):
+        with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port) as smtp:
             smtp.login(self.username, self.password)
 
-            message = f"Subject: {subject}\n\n{body}"
+            for recipient in self.recipients:
+                message = EmailMessage()
 
-            smtp.sendmail(self.username, self.recipients, message)
+                message["Subject"] = subject
+                message["From"] = self.username
+                message["To"] = recipient
+
+                message.set_content(body)
+
+                if body_alternative is not None:
+                    message.add_alternative(body_alternative, subtype="html")
+
+                smtp.send_message(message)
