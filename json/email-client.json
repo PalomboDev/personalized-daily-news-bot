@@ -5,5 +5,6 @@
   "password": "",
   "recipients": [
     ""
-  ]
+  ],
+  "default_subject": "Daily Python Bot News"
 }
