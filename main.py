@@ -24,6 +24,7 @@ email_client_file = JsonFile("json/email-client.json")
 email_client = EmailClient(email_client_file.get_key("smpt_server"), email_client_file.get_key("smpt_port"),
                            email_client_file.get_key("username"), email_client_file.get_key("password"),
                            email_client_file.get_key("recipients"))
+default_subject = email_client_file.get_key("default_subject")
 
 # MongoDB
 mongodb_file = JsonFile("json/mongodb.json")
@@ -36,8 +37,7 @@ news_mongodb_client = NewsMongoDBClient(mongodb_client, mongodb_database, mongod
 options_file = JsonFile("json/options.json")
 time_to_send = options_file.get_key("time_to_send")
 time_zone = pytz.timezone(options_file.get_key("time_zone"))
-default_article_limit = options_file.get_key("default_article_limit")
-default_subject = options_file.get_key("default_subject")
+default_article_limit = options_file.get_key("article_limit")
 
 
 def email_recipients_news(limit=default_article_limit):
