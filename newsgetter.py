@@ -12,9 +12,14 @@ class NewsGetter:
         self.sort_by = sort_by
 
     def get_json_articles(self):
-        return requests.get(
+        response = requests.get(
             f"{self.news_url}everything?q={self.keyword}&from={self.date}?country={self.country}&sortBy={self.sort_by}",
             headers={'Authorization': self.api_key}).json()["articles"]
+
+        if response:
+            return response
+        else:
+            return None
 
 
 class Article:

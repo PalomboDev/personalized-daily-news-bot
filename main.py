@@ -35,10 +35,11 @@ news_mongodb_client = NewsMongoDBClient(mongodb_client, mongodb_database, mongod
 options_file = utils.JsonFile("json/options.json")
 time_to_send = options_file.get_key("time_to_send")
 time_zone = pytz.timezone(options_file.get_key("time_zone"))
-default_article_limit = options_file.get_key("article_limit")
+default_article_get_limit = options_file.get_key("article_get_limit")
+default_article_send_limit = options_file.get_key("article_send_limit")
 
 
-def email_recipients_news(limit=default_article_limit):
+def email_recipients_news(limit=default_article_send_limit):
     body = ""
     alternative_body = """\
         <!DOCTYPE html>
@@ -84,29 +85,32 @@ def email_recipients_news(limit=default_article_limit):
     print(f"Recipients emailed. Recipients: {email_client.recipients}")
 
 
-def store_new_news(limit=default_article_limit):
-    i = 0
-    for json_article in news_getter.get_json_articles():
-        article = newsgetter.Article.json_article_to_article(json_article)
+def store_new_news(limit=default_article_get_limit):
+    json_articles = news_getter.get_json_articles()
 
-        if mongodb_collection.find_one({"title": article.title}) is not None:
-            continue
+    if json_articles is not None:
+        i = 0
+        for json_article in json_articles:
+            article = newsgetter.Article.json_article_to_article(json_article)
 
-        article_dict = newsgetter.Article.article_to_dict(article)
+            if mongodb_collection.find_one({"title": article.title}) is not None:
+                continue
 
-        mongodb_collection.insert_one(article_dict)
+            article_dict = newsgetter.Article.article_to_dict(article)
 
-        i += 1
-        if i == limit:
-            break
-    print("Stored new news articles.")
+            mongodb_collection.insert_one(article_dict)
+
+            i += 1
+            if i == limit:
+                break
+        print("Stored new news articles.")
 
 
 def check_time_to_send():
     time_now = datetime.now().astimezone(time_zone)
 
     if utils.is_time_to_send(time_now, time_to_send):
-        email_recipients_news(default_article_limit)
+        email_recipients_news(default_article_send_limit)
 
     if utils.is_on_the_hour(time_now):
         store_new_news()

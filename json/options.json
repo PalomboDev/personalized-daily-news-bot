@@ -1,5 +1,6 @@
 {
   "time_to_send": "08:00:00",
   "time_zone": "America/Chicago",
-  "article_limit": 10
+  "article_get_limit": 1,
+  "article_send_limit": 10
 }
