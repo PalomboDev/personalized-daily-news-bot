@@ -16,7 +16,7 @@ class NewsGetter:
             f"{self.news_url}everything?q={self.keyword}&from={self.date}?country={self.country}&sortBy={self.sort_by}",
             headers={'Authorization': self.api_key}).json()["articles"]
 
-        if response.status_code == 200:
+        if response:
             return response
         else:
             return None
